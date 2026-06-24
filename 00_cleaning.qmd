@@ -1,0 +1,112 @@
+---
+title: "R&D Cleaning"
+format: html
+editor: visual
+---
+
+```{r}
+library(dplyr)
+library(readr)
+data <- read_csv("~/Downloads/R&D/raw/R&D_Compustat.csv")
+```
+
+```{r}
+install.packages("fredr")
+library(fredr)
+library(tidyr)
+library(dplyr)
+```
+
+```{r}
+# Convert missing R&D (xrd) values to 0
+data <- data |>
+  mutate(xrd = ifelse(is.na(xrd), 0, xrd))
+
+# Verify the change
+sum(is.na(data$xrd))  # Should return 0
+
+```
+
+```{r}
+
+```
+
+```{r}
+library(fredr)
+library(tidyr)
+library(dplyr)
+
+fredr_set_key("834bcb81acd443cc4bd27634b71b84d1")
+
+indices <- list(
+  CPI      = "CPIAUCSL",
+  PPI      = "PPIACO",
+  GDP_DEF  = "GDPDEF",
+  PCE      = "PCEPI",
+  CORE_CPI = "CPILFESL",
+  CORE_PCE = "PCEPILFE"
+)
+
+fetch_index <- function(series_id, name) {
+  df <- fredr(
+    series_id         = series_id,
+    frequency         = "a",
+    observation_start = as.Date("1960-01-01"),
+    observation_end   = as.Date("2025-01-01")
+  )
+  df$index <- name
+  df
+}
+
+all_indices <- mapply(fetch_index, indices, names(indices), SIMPLIFY = FALSE)
+all_indices <- do.call(rbind, all_indices)
+
+inflation_wide <- all_indices %>%
+  mutate(year = as.integer(format(date, "%Y"))) %>%
+  select(year, index, value) %>%
+  pivot_wider(names_from = index, values_from = value)
+
+head(inflation_wide)
+```
+
+```{r}
+
+monetary_vars <- c("artfs", "at", "ch", "dltt", "invt", "lct", "xrd", "dt", "act", "ap")
+index_cols    <- c("CPI", "PPI", "GDP_DEF", "PCE", "CORE_CPI", "CORE_PCE")
+
+base_2025 <- inflation_wide %>% filter(year == 2025) %>% select(all_of(index_cols))
+
+cum_factors <- inflation_wide %>%
+  filter(year <= 2025) %>%
+  arrange(year) %>%
+  mutate(across(all_of(index_cols),
+                ~ as.numeric(base_2025[, cur_column()]) / .,
+                .names = "factor_{.col}"))
+
+data_adj <- data %>%
+  left_join(cum_factors %>% select(year, starts_with("factor_")),
+            by = c("fyear" = "year"))
+
+for (idx in index_cols) {
+  factor_col <- paste0("factor_", idx)
+  for (var in monetary_vars) {
+    new_col <- paste0(var, "_", idx)
+    data_adj[[new_col]] <- data_adj[[var]] * data_adj[[factor_col]]
+  }
+}
+
+data_adj %>%
+  filter(gvkey == "001000") %>%
+  select(fyear, xrd, starts_with("xrd_"))
+
+saveRDS(data_adj, "adjusted_rd.rds")
+write.csv(data_adj, "adjusted_rd.csv", row.names = FALSE)
+
+```
+
+```{r}
+
+```
+
+```         
+```
