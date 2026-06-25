@@ -14,12 +14,7 @@ An empirical analysis of U.S. research and development expenditure from 1953 to 
 - **Compustat (WRDS):** Firm-level R&D expenditure (`xrd`) and total assets (`at`) for U.S. public companies. Raw data excluded from repo due to WRDS redistribution restrictions.
 - **NCSES National Patterns of R&D Resources (Tables T2–T9):** Public aggregate data from NSF covering federal, business, higher education, and nonprofit sectors. All values in constant 2017 dollars.
 - 
-## Interactive Charts
-- [Sector Share by Decade](charts/sector_shares_pie.html)
-- [R&D by Type — Federal](charts/federal_rd_by_type.html)
-- [R&D by Type — Business](charts/business_rd_by_type.html)
-- [Basic Research: Funder to Performer](charts/basic_funder_to_performer.html)
-- 
+  
 ## Scripts
 | Script | Description |
 |--------|-------------|
