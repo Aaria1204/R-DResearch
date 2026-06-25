@@ -2,6 +2,9 @@
 
 An empirical analysis of U.S. research and development expenditure from 1953 to present, examining how investment has shifted across sectors, industries, and research types over seven decades. Built in R using Compustat firm-level data and NCSES national aggregate data.
 
+## Interactive Visualizations
+- [R&D Expenditures: Source of Funds → Performer (Sankey)](charts/sankey_funder_performer.html)
+  
 ## What This Project Does
 
 - Cleans and inflation-adjusts 70+ years of firm-level R&D data from Compustat (WRDS)
